@@ -14,6 +14,7 @@ def parse_args():
     parser = ArgumentParser(description="Tool for ping scanning a /24 IP range")
     #parser.add_argument("IPrange", help="The IP range to scan")
     parser.add_argument("--IPsegment", default="192.168")
+    parser.add_argument("--start-subnet", default=1, type=int)
 
     return parser.parse_args()
 
@@ -67,7 +68,6 @@ def change_int_ip(args, segment):
 
 if __name__ == '__main__':
     args = parse_args()
-    for i in range(22,255):
+    for i in range(args.start_subnet,255):
         change_int_ip(args=args, segment=i)
         ping(args=args, segment=i)
-
