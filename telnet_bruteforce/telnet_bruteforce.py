@@ -62,18 +62,18 @@ def get_telnet_connection(host, port):
     except Exception as e:
         exit_with_message('ERROR: unable to connect to {}\nGot error: {}'.format(host, e))
 
-def get_json_values_from_file(file):
+def get_json_values_from_file(file_path):
     """
     Read json values from file
-    :param file: The file to read the values from
+    :param file_path: The file to read the values from
     :return: values: list: The values read from file
     """
     try:
-        with open(file, 'r') as fh:
+        with open(file_path, 'r') as fh:
             values = load(fh)
         return values
     except OSError as e:
-        exit_with_message('ERROR: could not open {}\n Got error: {}'.format(file, e))
+        exit_with_message('ERROR: could not open {}\n Got error: {}'.format(file_path, e))
 
 def try_login_combination(connection, username, password, password_only=False, success_string=None):
     """
@@ -85,7 +85,7 @@ def try_login_combination(connection, username, password, password_only=False, s
     :param success_string: str: If this string is in the output, then the login was successful
     :return: success: bool: login successful or not
     """
-
+    connection.set_debuglevel(4)
     if not password_only:
         connection.read_until(b'login: ', timeout=1)
         connection.write(username.encode('ascii'), b'\r')
@@ -128,7 +128,7 @@ def main():
     if not args.password_only:
         # For each username we try all password combinations
         for username in usernames['usernames']:
-            for password in passwords:
+            for password in passwords['passwords']:
                 con = get_telnet_connection(args.host, args.port)
                 success = try_login_combination(con, username, password, success_string=args.success_string)
                 con.close()
