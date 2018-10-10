@@ -66,7 +66,7 @@ def get_json_values_from_file(file_path):
     """
     Read json values from file
     :param file_path: The file to read the values from
-    :return: values: list: The values read from file
+    :return: values: dict: The values read from file
     """
     try:
         with open(file_path, 'r') as fh:
@@ -99,14 +99,6 @@ def try_login_combination(connection, username, password, password_only=False, s
 def exit_with_message(message, exit_code=1):
     print(message)
     exit(exit_code)
-
-def print_passed_time(begin, end):
-    """
-    Print the time it has taken between begin and end.
-    :param begin: time: the start time
-    :param end: time: the end time
-    """
-    print('Total run time (s): {}'.format(end-begin))
 
 def login_successful(start_time, password, username=None):
     print('Login successful using username: {} and password: {}'.format(username, password))
